@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manager Decision Frameworks</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #00377b;
+    --navy-light: #1a4f96;
+    --navy-dark: #002255;
+    --accent: #e8f0fb;
+    --accent-mid: #b8cef0;
+    --text: #1a1a2e;
+    --text-muted: #5a6070;
+    --text-light: #8a8fa0;
+    --border: #e4e8f0;
+    --surface: #f7f9fd;
+    --white: #ffffff;
+    --green: #1a7a4a;
+    --green-bg: #eaf5ef;
+    --red: #b83232;
+    --red-bg: #fdf0f0;
+    --amber: #8a5500;
+    --amber-bg: #fef7e8;
+    --purple: #5a3a9a;
+    --purple-bg: #f3effe;
+    --tag-radius: 4px;
+    --card-radius: 10px;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--navy);
+    color: white;
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-icon {
+    width: 28px;
+    height: 28px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .brand-icon svg { width: 16px; height: 16px; }
+  .topbar-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+  .topbar-subtitle {
+    font-size: 12px;
+    opacity: 0.6;
+    margin-left: 12px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(255,255,255,0.25);
+  }
+  .topbar-actions { display: flex; gap: 8px; }
+  .btn-print {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-print:hover { background: rgba(255,255,255,0.2); }
+
+  /* LAYOUT */
+  .layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 56px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-label {
+    padding: 20px 18px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-light);
+  }
+  .policy-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-radius: 0;
+    transition: background 0.12s;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+    color: inherit;
+  }
+  .policy-item:hover { background: var(--surface); }
+  .policy-item.active {
+    background: var(--accent);
+    border-left-color: var(--navy);
+  }
+  .policy-item.active .policy-name { color: var(--navy); font-weight: 600; }
+  .policy-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .policy-name { font-size: 14px; color: var(--text); }
+  .policy-tag {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    letter-spacing: 0.04em;
+  }
+  .sidebar-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 16px;
+  }
+  .sidebar-footer {
+    padding: 16px 18px;
+    font-size: 12px;
+    color: var(--text-light);
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2.5rem 3rem;
+  }
+
+  /* FRAMEWORK HEADER */
+  .framework-header {
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .framework-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .framework-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 34px;
+    color: var(--text);
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .framework-desc {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 600px;
+    line-height: 1.6;
+  }
+  .framework-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 12px 16px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .framework-badge-label { font-size: 11px; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.07em; }
+  .framework-badge-value { font-size: 14px; font-weight: 600; color: var(--text); }
+
+  /* SECTIONS */
+  .section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .section-full {
+    margin-bottom: 1.5rem;
+  }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-header-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.1px;
+  }
+  .card-body { padding: 16px 20px; }
+
+  /* LIST ITEMS */
+  .check-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .check-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* TWO-COL INSIDE CARD */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .two-col-side {
+    padding: 16px 20px;
+  }
+  .two-col-side + .two-col-side {
+    border-left: 1px solid var(--border);
+  }
+  .two-col-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* ESCALATION STEPS */
+  .escalation-steps { display: flex; flex-direction: column; gap: 10px; }
+  .escalation-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .step-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-content {}
+  .step-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; color: var(--text); }
+  .step-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .step-trigger {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 5px;
+  }
+
+  /* EXAMPLES */
+  .examples-list { display: flex; flex-direction: column; gap: 10px; }
+  .example-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .example-scenario {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+  }
+  .example-body {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .example-verdict {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    float: right;
+  }
+
+  /* MISTAKES */
+  .mistake-list { display: flex; flex-direction: column; gap: 10px; }
+  .mistake-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--red-bg);
+    border: 1px solid #f5c0c0;
+    border-radius: 8px;
+  }
+  .mistake-x {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--red);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .mistake-content {}
+  .mistake-title { font-size: 13px; font-weight: 600; color: var(--red); margin-bottom: 3px; }
+  .mistake-desc { font-size: 13px; color: #7a3030; line-height: 1.5; }
+
+  /* HR REQUIRED */
+  .hr-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hr-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--accent);
+    border: 1px solid var(--accent-mid);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--navy-dark);
+    line-height: 1.4;
+  }
+  .hr-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--navy);
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  /* PRINT */
+  @media print {
+    .topbar, .sidebar, .btn-print { display: none !important; }
+    .layout { height: auto; overflow: visible; }
+    .main { padding: 1rem; }
+    .card { break-inside: avoid; }
+    .section-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .section-grid { grid-template-columns: 1fr; }
+    .hr-items { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .two-col-side + .two-col-side { border-left: none; border-top: 1px solid var(--border); }
+    .main { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="2" width="14" height="2" rx="1" fill="white"/>
+        <rect x="1" y="6" width="9" height="2" rx="1" fill="white" opacity="0.7"/>
+        <rect x="1" y="10" width="11" height="2" rx="1" fill="white" opacity="0.5"/>
+      </svg>
+    </div>
+    <span class="topbar-title">Manager Decision Frameworks</span>
+    <span class="topbar-subtitle">Human Resources</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn-print" onclick="window.print()">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6V2h8v4M4 12H2V7h12v5h-2M4 9h8v5H4V9z" stroke="white" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      Print / Save PDF
+    </button>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sidebar-label">Policy Frameworks</div>
+
+    <div class="policy-item active" data-key="attendance" style="cursor:pointer">
+      <div class="policy-dot" style="background:#00377b"></div>
+      <span class="policy-name">Attendance & Occurrences</span>
+    </div>
+    <div class="policy-item" data-key="performance" style="cursor:pointer">
+      <div class="policy-dot" style="background:#1a7a4a"></div>
+      <span class="policy-name">Performance Management</span>
+    </div>
+    <div class="policy-item" data-key="corrective" style="cursor:pointer">
+      <div class="policy-dot" style="background:#8a5500"></div>
+      <span class="policy-name">Corrective Action</span>
+    </div>
+    <div class="policy-item" data-key="leave" style="cursor:pointer">
+      <div class="policy-dot" style="background:#5a3a9a"></div>
+      <span class="policy-name">Leave of Absence / FMLA</span>
+    </div>
+    <div class="policy-item" data-key="conduct" style="cursor:pointer">
+      <div class="policy-dot" style="background:#b83232"></div>
+      <span class="policy-name">Workplace Conduct</span>
+    </div>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-footer">Last updated March 2025 · Human Resources</div>
+  </nav>
+
+  <main class="main" id="main-content">
+    <!-- Content injected by JS -->
+  </main>
+</div>
+
+<script>
+const policies = {
+
+  attendance: {
+    color: '#00377b',
+    bg: '#e8f0fb',
+    label: 'Attendance & Occurrences',
+    category: 'Attendance',
+    description: 'Use this framework to consistently apply the attendance policy, determine excused vs. unexcused absences, and know exactly when to escalate. Based on Better Companies Employee Handbook.',
+    audience: 'All Managers',
+    reviewCycle: 'Annual',
+    trainingNote: '<strong>Training period note:</strong> Employees in the first 30 days of a 90-day training program may not miss any time. Days 31–90: up to 3 excused days total are allowed with supporting documentation and supervisor approval.',
+    definition: {
+      title: 'What are actionable offenses?',
+      icon: '📋',
+      iconBg: '#e8f0fb',
+      items: [
+        { text: '3 or more occurrences in a 30-day period', type: 'yes' },
+        { text: 'No call, no show — failure to report or contact the company', type: 'yes' },
+        { text: 'Absence the day before or after a holiday', type: 'yes' },
+        { text: 'Absence the day before or after pre-approved scheduled PTO', type: 'yes' },
+        { text: 'FMLA/ADA-protected absences — handled case-by-case, contact HR', type: 'no' },
+        { text: 'Approved bereavement leave (must be 30+ days employed; up to 5 days for family, 3 for pet)', type: 'no' },
+        { text: 'Jury duty with summons documentation provided', type: 'no' },
+      ],
+      saturdayProtocol: {
+        label: 'Agents only — Saturday Callouts',
+        items: [
+          { num: '1', text: '1st violation: verbal or written reprimand', color: '#8a5500', bg: '#fef7e8' },
+          { num: '2', text: '2nd violation: disqualified from Saturdays for 4 weeks', color: '#8a5500', bg: '#fef7e8' },
+          { num: '3', text: '3rd violation: disqualified from Saturdays for 6 weeks', color: '#b83232', bg: '#fdf0f0' },
+        ]
+      }
+    },
+    excused: {
+      excused: [
+        'UKG time-off request submitted 2+ weeks in advance',
+        'Approved by direct supervisor in UKG',
+        'Employee has sufficient Paid Sick time to cover absences that qualify under CA Paid Sick Leave:<br><small style="color:#5a6070;line-height:1.6;display:block;margin-top:3px;padding-left:4px;">• Personal illness/injury (physical or mental)<br>• Medical diagnosis, treatment, or preventive care<br>• Caring for an ill family member<br>• Recovery from domestic violence, sexual assault, or stalking</small>',
+        'FMLA / ADA protected (handled case-by-case with HR)',
+        'Jury duty with summons documentation',
+        'Bereavement leave per policy (30+ days tenure required)',
+      ],
+      unexcused: [
+        'Time off without prior approval',
+        'Taking time off after request was denied',
+        'No call, no show',
+        'Absence day before or after a holiday',
+        'Absence day before or after pre-approved PTO',
+        'Early departure without supervisor approval',
+        'PTO request not approved in UKG',
+      ]
+    },
+    pointsTable: {
+      title: 'How do Points / Occurrences work?',
+      rows: [
+        { label: 'Unexcused Absence', points: '1.0 pt', severity: 'high' },
+        { label: 'No Call / No Show', points: '1.0 pt', severity: 'high' },
+        { label: 'Tardy (Late In)', points: '0.5 pt', severity: 'mid' },
+        { label: 'Early Out (without prior approval)', points: '0.5 pt', severity: 'mid' },
+      ],
+      thresholds: [
+        '3+ occurrences/points (tardiness, early departures, unexcused absences) in 30 days = disciplinary action.',
+        '3 occurrences/points per quarter, 9 in 12 months = grounds for termination.',
+        'Job abandonment = 3+ days no call/no show.',
+      ]
+    },
+    escalation: [
+      { num: 1, title: 'Verbal Coaching', desc: 'Private conversation documenting the pattern. Remind employee of the 2-hour call-out requirement and the UKG absence request process.', trigger: '1–2 occurrences in 30 days', triggerColor: '#1a7a4a', triggerBg: '#eaf5ef' },
+      { num: 2, title: 'Written Warning', desc: 'Request assistance from HR for formal written counseling. Employee signature required. Copy provided to HR.', trigger: '3 occurrences in any 30-day period', triggerColor: '#8a5500', triggerBg: '#fef7e8' },
+      { num: 3, title: 'Final Written Warning / Suspension Review', desc: 'Escalate to HR before issuing. Document cumulative pattern. State clearly that further violations may result in termination.', trigger: '3 occurrences in a quarter OR pattern continues after written warning', triggerColor: '#b83232', triggerBg: '#fdf0f0' },
+      { num: 4, title: 'Termination Review', desc: 'Do not terminate without HR approval. HR will review the full documentation trail. Job abandonment (3+ consecutive no-contact days) may result in immediate separation.', trigger: '9 occurrences in 12 months, 3 per quarter, or 3+ consecutive no-contact days', triggerColor: '#5a3a9a', triggerBg: '#f3effe' },
+    ],
+    hrRequired: [
+      'Employee mentions a medical condition or FMLA/ADA situation',
+      'Employee says they have an ongoing condition (even casually)',
+      'Employee references workers\' comp injury or work-related illness',
+      'Before issuing any Final Written Warning',
+      'Before any termination conversation',
+      'Any no call no show before discipline is issued',
+      'Job abandonment situations (3+ consecutive days)',
+      'When medical documentation is being requested',
+      'Jury duty or bereavement leave requests',
+      'Employee in active 90-day training program',
+    ],
+    examples: [
+      { scenario: 'Employee calls out — this is their 3rd time this month', verdict: 'Written Warning', verdictColor: '#b83232', verdictBg: '#fdf0f0', explanation: '3 occurrences in 30 days meets the threshold for disciplinary action. Request assistance from HR for formal written counseling citing specific dates and the policy threshold.' },
+      { scenario: 'Employee leaves early — no supervisor approval', verdict: '½ Occurrence', verdictColor: '#8a5500', verdictBg: '#fef7e8', explanation: 'Early departure without approval = ½ occurrence. Document it. Two of these equal one full occurrence. Remind the employee they must get in-person supervisor approval before leaving early.' },
+      { scenario: 'Employee no call no shows 3 days in a row', verdict: 'Call HR First', verdictColor: '#b83232', verdictBg: '#fdf0f0', explanation: 'Attempt to contact the employee. Do not issue discipline until HR is notified. If no contact for 3+ consecutive days, HR will initiate job abandonment process.' },
+      { scenario: 'Employee has a doctor\'s appointment but didn\'t submit a request', verdict: 'Unexcused', verdictColor: '#5a3a9a', verdictBg: '#f3effe', explanation: 'Non-emergency absences require 2 weeks advance notice or manager\'s discretion and approval via UKG. A same-day medical appointment without prior approval is unexcused unless it qualifies under paid sick leave or FMLA.' },
+      { scenario: 'Employee calls out sick for three (3) consecutive days', verdict: 'Doc Note May Apply', verdictColor: '#b83232', verdictBg: '#fdf0f0', explanation: 'A doctor\'s note may be required after three consecutive sick days. Managers should not ask for the reason for the illness or request any medical details.' },
+      { scenario: 'Employee requests same-day PTO', verdict: 'Manager Discretion', verdictColor: '#8a5500', verdictBg: '#fef7e8', explanation: 'Approve or deny based on business needs and policy. Apply consistently across the team.' },
+      { scenario: 'Employee mentions Paid Sick Leave during counseling', verdict: 'Know the Rules', verdictColor: '#5a3a9a', verdictBg: '#f3effe', explanation: 'Employees may use accrued sick leave for illness, medical appointments, or certain family-care reasons. However, employers can require employees to follow reasonable notification procedures. The employee must communicate that they are sick or need to use sick leave within a reasonable time. If the employee simply called out or no-showed without indicating they were sick, they generally did not properly request sick leave.' },
+    ],
+    mistakes: [
+      { title: 'Accepting and excusing a verbal call-out', desc: 'Notification does not automatically excuse a call-out. Use your best discretion if the call-out is due to an emergency. Request assistance from HR if needed.' },
+      { title: 'Verbally approving time offs', desc: 'A request is not approved until the employee receives written confirmation from UKG. Managers are responsible for approving or denying their employees\' time off requests in UKG.' },
+      { title: 'Not tracking early departures as half-occurrences', desc: 'Two early departures = one full occurrence. Managers often let early departures slide without documenting them, then have no paper trail when patterns emerge. Log every early departure — even small ones.' },
+      { title: 'Applying the Saturday protocol inconsistently for agents', desc: 'The Saturday schedule is published by Thursday EOD. If an agent misses or arrives late without an approved reason, violations must be tracked and applied uniformly. Letting one agent off the hook while enforcing for another creates fairness and legal exposure.' },
+      { title: 'Not applying Paid Sick Leave for qualified reasons', desc: 'Even if an employee doesn\'t select the Paid Sick Leave time-off type in UKG, managers can apply CA Paid Sick Leave as long as the employee has a qualified reason. This can be as simple as: "I am not feeling well. Taking the day to rest."' },
+    ]
+  },
+
+  performance: {
+    color: '#1a7a4a',
+    bg: '#eaf5ef',
+    label: 'Performance Management',
+    category: 'Performance',
+    description: 'Guide for managing underperformance, setting expectations, and executing performance improvement plans (PIPs) correctly and consistently.',
+    audience: 'All Managers',
+    reviewCycle: 'Ongoing',
+    definition: {
+      title: 'What counts as a performance issue?',
+      icon: '📊',
+      iconBg: '#eaf5ef',
+      items: [
+        { text: 'Consistently missing measurable KPIs or productivity targets', type: 'yes' },
+        { text: 'Repeated quality errors that impact customers, team, or operations', type: 'yes' },
+        { text: 'Failure to complete assigned tasks within reasonable timeframes', type: 'yes' },
+        { text: 'Inability to meet role requirements after coaching and training', type: 'yes' },
+        { text: '(Potentially) a temporary dip due to a personal crisis or medical issue', type: 'no' },
+        { text: 'Underperformance caused by unclear expectations or lack of tools', type: 'no' },
+        { text: 'System/tool failures outside employee control', type: 'no' },
+      ]
+    },
+    excused: {
+      excused: [
+        'Role changed without adequate training or transition time',
+        'Performance tied to a disclosed medical condition (ADA review)',
+        'System/tool failures outside employee control',
+      ],
+      unexcused: [
+        'Consistently missing targets after documented coaching',
+        'Repeated errors after specific, documented corrective feedback',
+        'Refusing to follow process or manager direction',
+        'Failing to meet expectations clearly outlined in writing',
+        'Not completing assigned tasks without a valid reason',
+        'Low engagement and disregard for team expectations',
+      ]
+    },
+    escalation: [
+      { num: 1, title: 'Informal Coaching', desc: 'Direct, private conversation. Identify the gap, set clear expectations, agree on next steps. Document in your own notes. Recap with an email to the employee and bcc HR.', trigger: 'First sign of a pattern', triggerColor: '#1a7a4a', triggerBg: '#eaf5ef' },
+      { num: 2, title: 'Formal Written Warning', desc: 'Document the specific performance gap, what improvement looks like, timeline, and consequences. Employee signature required. Consult with HR.', trigger: 'No improvement after 2–3 coaching sessions', triggerColor: '#8a5500', triggerBg: '#fef7e8' },
+      { num: 3, title: 'Performance Improvement Plan (PIP)', desc: 'Structured 30/60/90-day plan with specific measurable goals, check-in schedule, and explicit consequence if goals are not met. Requires HR sign-off.', trigger: 'Continued underperformance after written warning', triggerColor: '#b83232', triggerBg: '#fdf0f0' },
+      { num: 4, title: 'PIP Outcome / Termination Review', desc: 'At PIP end date, HR and manager jointly assess results. Do not make a termination decision without HR involvement.', trigger: 'End of PIP period', triggerColor: '#5a3a9a', triggerBg: '#f3effe' },
+    ],
+    hrRequired: [
+      'Before placing an employee on a formal PIP',
+      'Before any termination conversation',
+      'When performance may be linked to a medical condition',
+      'If the employee has made any internal HR complaint recently',
+    ],
+    examplesNote: 'All discussions about performance should be documented and provided to HR.',
+    examples: [
+      { scenario: 'Employee consistently misses their daily/weekly/monthly goals', verdict: 'Coach Now', verdictColor: '#1a7a4a', verdictBg: '#eaf5ef', explanation: 'Document the gap. Set a specific numeric expectation in writing. Schedule a follow-up to assess progress before escalating.' },
+      { scenario: 'Employee makes repeated data entry errors or incorrect dispositioning', verdict: 'Written Warning', verdictColor: '#8a5500', verdictBg: '#fef7e8', explanation: 'After prior coaching, this pattern requires a formal document. Specify the error, the standard, and the deadline for improvement.' },
+      { scenario: 'High performer struggles after returning from bereavement', verdict: 'Support First', verdictColor: '#5a3a9a', verdictBg: '#f3effe', explanation: 'Do not initiate performance action. Have a supportive check-in, offer EAP resources, and set a soft 30-day observation period before reassessing.' },
+      { scenario: 'New hire is behind peers', verdict: 'Coach Now', verdictColor: '#1a7a4a', verdictBg: '#eaf5ef', explanation: 'Increase coaching frequency, clarify expectations, and check if training resources are adequate. Consult with HR if employee is severely underperforming.' },
+      { scenario: 'Employee struggles to learn core job functions after training period', verdict: 'Coach Now', verdictColor: '#1a7a4a', verdictBg: '#eaf5ef', explanation: 'Performance concern tied to role competency. Document training provided and specific gaps. Set clear expectations and improvement timeline. Document conversation.' },
+    ],
+    mistakes: [
+      { title: 'Waiting too long to address underperformance', desc: 'The longer you wait, the harder it is to defend the action. Start documenting at the first consistent pattern — not after months of hoping it improves.' },
+      { title: 'Setting vague improvement goals on a PIP', desc: '"Improve attitude" and "be more productive" are not measurable. Goals must be specific, numeric, and time-bound — or the PIP is unenforceable.' },
+      { title: 'Using a PIP as a paper trail to fire someone you\'ve already decided to let go', desc: 'PIPs must be genuine improvement opportunities. If the decision is already made, HR needs to know — a bad-faith PIP creates significant legal risk.' },
+      { title: 'Not documenting coaching conversations along the way', desc: 'Verbal coaching that isn\'t documented doesn\'t exist from a legal standpoint. Keep a running log in your notes — dates, topics, outcomes, and provide to HR.' },
+      { title: 'Over-coaching without escalating', desc: 'Repeated "talks" but never moving to formal discipline signals there are no real consequences. Coaching → Written → Final. Don\'t stay in coaching forever.' },
+      { title: 'Not following up after coaching', desc: 'Giving feedback once and never revisiting it creates no accountability or progress tracking. Set:\n  • A follow-up date\n  • A measurable checkpoint' },
+    ]
+  },
+
+  corrective: {
+    color: '#8a5500',
+    bg: '#fef7e8',
+    label: 'Corrective Action',
+    category: 'Corrective Action',
+    description: 'Framework for applying progressive discipline fairly and legally — from verbal warnings through termination, including when to skip steps. Based on Better Companies Employee Handbook.',
+    audience: 'All Managers',
+    reviewCycle: 'Annual',
+    trainingNote: '<strong>⚡ Immediate termination offenses:</strong> Theft, fraud/falsification of records, providing false statements to customers or financial institutions, physical threats, drug/alcohol impairment at work, or unauthorized disclosure of confidential information. Do not apply progressive steps — contact HR immediately before any conversation with the employee.',
+    definition: {
+      title: 'What warrants corrective action?',
+      icon: '⚠️',
+      iconBg: '#fef7e8',
+      items: [
+        { text: 'Repeated violation of a written policy after prior notice', type: 'yes' },
+        { text: 'Insubordination — refusal to follow reasonable, job-related directions from a supervisor', type: 'yes' },
+        { text: 'Rudeness, profanity, or unprofessional conduct toward coworkers, customers, or vendors', type: 'yes' },
+        { text: 'Misuse or unauthorized use of company equipment, vehicles, or property', type: 'yes' },
+        { text: 'Sleeping or inattention on the job', type: 'yes' },
+        { text: 'Failure to maintain dress, grooming, or office appearance standards', type: 'yes' },
+        { text: 'Romantic/sexual relationship between supervisor and subordinate (must disclose; may require reassignment)', type: 'yes' },
+        { text: 'Smoking in prohibited areas (buildings, vehicles, non-designated zones), this includes electronic smoking devices', type: 'yes' },
+        { text: 'Consistent poor performance after documented coaching', type: 'yes' },
+        { text: 'Compliance violation', type: 'yes' },
+        { text: 'Theft of money or property from company, coworkers, or customers — skip to termination review', type: 'no' },
+        { text: 'Fraud, falsification of any company document, or false statements to customers — skip to termination review', type: 'no' },
+        { text: 'Drug/alcohol impairment at work or on company property — skip to termination review', type: 'no' },
+        { text: 'Engaging in illegal activity on duty or on company property — skip to termination review', type: 'no' },
+        { text: 'Deliberate damage to company, customer, or coworker property — skip to termination review', type: 'no' },
+        { text: 'Unauthorized disclosure of business secrets or confidential information — skip to termination review', type: 'no' },
+      ]
+    },
+    excused: {
+      excused: [
+        'Behavior linked to a documented disability (ADA review required)',
+        'Whistleblower activity or protected internal complaint',
+        'Policy violation due to lack of training or unclear communication',
+        'Lawful prescribed medication use (except marijuana, regardless of prescription)',
+        'Religious accommodation for dress/grooming (contact HR)',
+      ],
+      unexcused: [
+        'Repeated violations after documented prior warning',
+        'Deliberate falsification of timesheets, records, or documents',
+        'Threats, harassment, or intimidation of any coworker',
+        'Theft, misuse, or destruction of company property',
+        'Refusal to submit to drug/alcohol screening when required',
+        'Under the influence of alcohol or drugs in the workplace',
+        'Retaliation against an employee for reporting a concern',
+        'Undisclosed supervisor-subordinate romantic relationship',
+      ]
+    },
+    escalationNote: 'Managers should always consult with HR prior to disciplining for the above mentioned reasons.',
+    escalation: [
+      { num: 1, title: 'Verbal Warning', desc: 'Private conversation. State the specific behavior, cite the policy, set expectations, and document the date and content in your manager notes.', trigger: 'First offense — minor policy violations', triggerColor: '#1a7a4a', triggerBg: '#eaf5ef' },
+      { num: 2, title: 'Written Warning', desc: 'Formal document citing the specific violation, prior coaching, policy reference, expectations going forward, and consequence of continued violations. Employee acknowledgment required. Copy to HR.', trigger: 'Repeat offense or escalated severity after verbal', triggerColor: '#8a5500', triggerBg: '#fef7e8' },
+      { num: 3, title: 'Final Written Warning', desc: 'Last formal step before termination. Must be reviewed and approved by HR before issuing. Explicitly states that the next violation may result in separation. Must have HR present in meeting.', trigger: 'Third offense or significant policy breach after written warning', triggerColor: '#b83232', triggerBg: '#fdf0f0' },
+      { num: 4, title: 'Termination / Separation', desc: 'Do not conduct without HR present or on-call. For immediate termination offenses, contact HR before any conversation with the employee.', trigger: 'Further violation, gross misconduct, or immediate termination offense', triggerColor: '#5a3a9a', triggerBg: '#f3effe' },
+    ],
+    hrRequired: [
+      'Before any Final Written Warning is issued',
+      'Before any termination — no exceptions',
+      'Any harassment, discrimination, or retaliation allegation',
+      'Theft, fraud, or falsification of any document',
+      'Drug/alcohol impairment or positive screening result',
+      'Any disclosed or suspected supervisor-subordinate relationship',
+      'Employee has filed an internal complaint in the past 6 months',
+      'Any involuntary suspension (paid or unpaid)',
+      'Employee refuses drug/alcohol screening',
+      'Any action involving a manager or above',
+    ],
+    examples: [
+      { scenario: 'Employee is rude to a customer on a recorded call', verdict: 'Verbal Warning', verdictColor: '#8a5500', verdictBg: '#fef7e8', explanation: 'First offense — cite the Attitude and Professionalism policy. Document the call reference, the specific behavior, and the expectation. If it continues, or rudeness is severe, escalate to written warning.' },
+      { scenario: 'Employee uses profanity toward a coworker in front of others', verdict: 'Written Warning', verdictColor: '#b83232', verdictBg: '#fdf0f0', explanation: 'Severity justifies skipping verbal — this is witnessed unprofessional conduct. Document the witnesses, the language used, and the impact. Notify HR same day.' },
+      { scenario: 'Employee clocks in for a coworker (time fraud)', verdict: 'HR Immediately', verdictColor: '#b83232', verdictBg: '#fdf0f0', explanation: 'Falsification of a company document. Skip progressive steps — contact HR before any conversation. Both employees may be subject to termination.' },
+      { scenario: 'Employee smells of alcohol during a shift', verdict: 'HR Immediately', verdictColor: '#b83232', verdictBg: '#fdf0f0', explanation: 'This triggers reasonable suspicion testing. Remove the employee from their duties, contact HR before any conversation. Do not accuse — state you need to follow policy. HR will direct next steps including screening.' },
+      { scenario: 'Manager discloses they are dating a direct report', verdict: 'HR Required', verdictColor: '#5a3a9a', verdictBg: '#f3effe', explanation: 'Per policy, a supervisor-subordinate romantic relationship is prohibited. Contact HR immediately. HR will determine required steps — which may include reassignment, restructuring, or further action.' },
+      { scenario: 'Employee found sleeping at their workstation', verdict: 'Written Warning', verdictColor: '#8a5500', verdictBg: '#fef7e8', explanation: 'Sleeping on the job is a policy violation. Document what you observed (time, location, witnesses). Issue a written warning citing the Sleeping policy. Repeat offense escalates to final written warning.' },
+    ],
+    mistakes: [
+      { title: 'Skipping steps out of frustration', desc: 'Going straight to termination without documentation exposes the company legally. Even for serious issues, contact HR first — don\'t act alone. The exception is immediate termination offenses — but even then, HR must be contacted before the conversation happens.' },
+      { title: 'Conducting a termination without HR present', desc: 'You should never deliver a termination conversation solo. HR must be involved — either in person, by phone, or with prior written sign-off on the action.' },
+      { title: 'Handling a drug/alcohol situation without HR', desc: 'Reasonable suspicion situations are high-stakes legally. Do not accuse the employee, do not test on your own, and do not allow them to continue working or drive home. Remove from duties and call HR immediately.' },
+      { title: 'Ignoring a disclosed or suspected supervisor-subordinate relationship', desc: 'Even if both parties say it\'s fine, a supervisor-subordinate relationship must be reported to HR. Ignoring it creates a serious harassment liability — especially if the relationship ends badly.' },
+      { title: 'Allowing too much time between offense and action', desc: 'Disciplinary action should follow the incident within a reasonable timeframe (typically 24–72 hours for non-investigations). Delayed discipline weakens the case and signals the behavior was acceptable.' },
+      { title: 'Treating similar situations differently based on the employee', desc: 'If you issued a verbal warning to one employee for an offense and a written to another for the same thing, document the differentiating factor clearly — or you have a consistency problem that creates legal exposure.' },
+    ]
+  },
+
+  leave: {
+    color: '#5a3a9a',
+    bg: '#f3effe',
+    label: 'Leave of Absence / FMLA',
+    category: 'Leave & FMLA',
+    description: 'Know how to respond when an employee needs extended time off — from the first conversation through reinstatement — without creating legal risk.',
+    audience: 'All Managers',
+    reviewCycle: 'Annual',
+    definition: {
+      title: 'What triggers a leave review?',
+      icon: '📅',
+      iconBg: '#f3effe',
+      items: [
+        { text: 'Employee mentions a serious health condition (theirs or a family member\'s)', type: 'yes' },
+        { text: 'Recurring intermittent absences tied to a chronic condition', type: 'yes' },
+        { text: 'Pregnancy, birth, adoption, or fostering of a child', type: 'yes' },
+        { text: 'A short-term illness under 3 days without prior chronic condition', type: 'no' },
+        { text: 'Pre-approved PTO for vacation (not medically related)', type: 'no' },
+      ]
+    },
+    excused: {
+      excused: [
+        'FMLA/CFRA-qualifying: serious health condition (employee or spouse/child/parent)',
+        'Pregnancy and bonding leave (CFRA/FMLA)',
+        'Military caregiver leave (up to 26 weeks)',
+        'Workers\' compensation leave',
+        'State-mandated leave (CFRA, PDL, etc.)',
+        'ADA accommodation leave beyond FMLA',
+      ],
+      unexcused: [
+        'Extended absence without any leave application submitted',
+        'Leave taken after FMLA designation is denied',
+        'No medical certification returned within deadline',
+        'Leave for a reason that does not qualify under any policy',
+        'Leave beyond the approved return-to-work date with no extension approved',
+      ]
+    },
+    escalation: [
+      { num: 1, title: 'Initial Notice from Employee', desc: 'Employee mentions a health situation. Do not ask for details. Simply say: "Let me connect you with HR to discuss your options." Do not try to assess eligibility yourself.', trigger: 'Employee mentions health or family leave need', triggerColor: '#5a3a9a', triggerBg: '#f3effe' },
+      { num: 2, title: 'HR Begins the LOA Process', desc: 'HR will provide the appropriate documentation to the employee.', trigger: 'HR initiates — manager is notified', triggerColor: '#1a7a4a', triggerBg: '#eaf5ef' },
+      { num: 3, title: 'Leave Approved and Scheduled', desc: 'HR approves and designates the leave. As manager, you receive the expected return date and any intermittent schedule if applicable. Plan coverage accordingly.', trigger: 'Certification returned and reviewed', triggerColor: '#8a5500', triggerBg: '#fef7e8' },
+      { num: 4, title: 'Reinstatement', desc: 'Employee returns to their same or equivalent position. Do not change their role, hours, or pay without HR approval.', trigger: 'Return-to-work date', triggerColor: '#00377b', triggerBg: '#e8f0fb' },
+    ],
+    hrRequired: [
+      'As soon as an employee mentions a health or medical reason for absence',
+      'When you\'re unsure if a condition qualifies',
+      'Before denying or approving any leave request yourself',
+      'If an employee returns and requests accommodation',
+      'Any disciplinary action involving an employee who has taken FMLA/CFRA recently',
+      'Before changing a returning employee\'s role or schedule',
+    ],
+    examples: [
+      { scenario: 'Employee texts: "I need time off, I\'m having surgery next month"', verdict: 'Call HR Today', verdictColor: '#5a3a9a', verdictBg: '#f3effe', explanation: 'This is an FMLA trigger. Connect them to HR immediately. Do not ask what surgery or how long — that\'s HR\'s role. Do not make any coverage decisions until HR confirms the leave type.' },
+      { scenario: 'Employee has called out sick on Mondays 6 times in 3 months', verdict: 'Possible FMLA', verdictColor: '#5a3a9a', verdictBg: '#f3effe', explanation: 'This pattern suggests a chronic condition. Before logging any occurrences, contact HR. Intermittent FMLA may already apply — you may need to retroactively remove those occurrences.' },
+      { scenario: 'Employee returns from leave and seems hesitant about their workload', verdict: 'Have the Conversation', verdictColor: '#1a7a4a', verdictBg: '#eaf5ef', explanation: 'Schedule a supportive check-in. If they request accommodations or mention ongoing limitations, loop in HR before any role or schedule decisions are made.' },
+    ],
+    mistakes: [
+      { title: 'Asking why the employee needs medical leave', desc: 'You are only entitled to know that a medical condition exists and a general timeline. Asking for a diagnosis or details violates privacy laws. Let HR collect the clinical information.' },
+      { title: 'Counting FMLA/CFRA absences as attendance occurrences', desc: 'FMLA/CFRA absences — even if the employee didn\'t tell you they were protected — cannot be counted against attendance. If you\'re unsure whether a string of absences qualifies, stop logging until HR advises.' },
+      { title: 'Contacting the employee too frequently during leave', desc: 'Brief, practical communication (return date, benefits) is fine. Pressure or work-related contact during leave can constitute interference — which is an FMLA/CFRA violation.' },
+      { title: 'Returning the employee to a different role without approval', desc: 'FMLA/CFRA entitles employees to return to the same or an equivalent position. Any change — even well-intentioned — must be cleared with HR first.' },
+    ]
+  },
+
+  conduct: {
+    color: '#b83232',
+    bg: '#fdf0f0',
+    label: 'Workplace Conduct',
+    category: 'Conduct',
+    description: 'How to identify, respond to, and escalate workplace conduct issues — including harassment, conflict, and policy violations — without overstepping your role.',
+    audience: 'All Managers',
+    reviewCycle: 'Annual',
+    definition: {
+      title: 'What counts as a conduct issue?',
+      icon: '🚦',
+      iconBg: '#fdf0f0',
+      items: [
+        { text: 'Verbal threats, intimidation, or bullying directed at a coworker', type: 'yes' },
+        { text: 'Unwanted physical contact or sexually inappropriate comments', type: 'yes' },
+        { text: 'Derogatory comments based on a protected class, such as: Age (40+), Ancestry, Color, Disability (mental and physical), Genetic information, Gender expression, Gender identity, Marital status, Medical condition, Military or veteran status, National origin, Race, Religion/religious creed, Sex/gender, Sexual orientation', type: 'yes' },
+        { text: 'Deliberate sabotage of a coworker\'s work or reputation', type: 'yes' },
+        { text: 'Sharing confidential employee or company data without authorization', type: 'yes' },
+        { text: 'A heated argument between peers that was quickly de-escalated', type: 'no' },
+        { text: 'Personality conflicts without policy violations', type: 'no' },
+      ]
+    },
+    excused: {
+      excused: [
+        'Conflict that stems from a policy or process dispute (route to process fix)',
+        'Heated exchange that was self-corrected with an apology',
+        'Cultural or communication misunderstanding (route to coaching)',
+        'Frustration expressed privately to manager without targeting a person',
+      ],
+      unexcused: [
+        'Any form of harassment based on protected characteristics',
+        'Retaliation against an employee for reporting a concern',
+        'Threats of violence or intimidating physical behavior',
+        'Repeated targeted behavior after prior coaching',
+        'Sharing another employee\'s personal information',
+        'Social media posts that disparage coworkers or the company',
+      ]
+    },
+    escalation: [
+      { num: 1, title: 'Listen and Document', desc: 'When an employee comes to you with a concern, listen fully. Take notes. Do not promise confidentiality — tell them you are required to report certain things.', trigger: 'Report or observation of conduct concern', triggerColor: '#1a7a4a', triggerBg: '#eaf5ef' },
+      { num: 2, title: 'Report to HR', desc: 'Any allegation involving harassment, discrimination, threats, or retaliation must be reported to HR. Do not investigate yourself.', trigger: 'Any protected-class or safety concern', triggerColor: '#b83232', triggerBg: '#fdf0f0' },
+      { num: 3, title: 'HR-Led Investigation', desc: 'HR will conduct the investigation. Your role is to cooperate, provide your notes, and avoid discussing the matter with the parties involved. Maintain normal operations.', trigger: 'HR takes ownership', triggerColor: '#8a5500', triggerBg: '#fef7e8' },
+      { num: 4, title: 'Outcome and Action', desc: 'HR will communicate findings and recommended corrective action to you. Do not share investigation results with the team. Apply whatever action HR directs.', trigger: 'Investigation complete', triggerColor: '#5a3a9a', triggerBg: '#f3effe' },
+    ],
+    hrRequired: [
+      'Immediately if there is any threat of violence or safety concern',
+      'Any allegation of harassment or discrimination — same day',
+      'When an employee files any type of formal complaint',
+      'When you observe or witness a potential policy violation yourself',
+      'Any conduct issue involving two employees at different levels of seniority',
+      'Before taking any disciplinary action related to a reported incident',
+      'If you believe retaliation is occurring after a prior complaint',
+    ],
+    examples: [
+      { scenario: 'An employee tells you a coworker made a racial joke in the break room', verdict: 'HR Today', verdictColor: '#b83232', verdictBg: '#fdf0f0', explanation: 'This is a protected-class incident. Write down exactly what the employee told you (in their words), note the date/time, and report to HR. Do not confront the alleged coworker yourself.' },
+      { scenario: 'Two employees had a loud argument — both apologized after', verdict: 'Document & Monitor', verdictColor: '#8a5500', verdictBg: '#fef7e8', explanation: 'Not necessarily a formal issue if it was resolved. Document what you observed, speak to both parties separately, and note it in your log. Notify HR if there\'s a history or power imbalance.' },
+      { scenario: 'Employee posts on social media complaining about their schedule', verdict: 'Review First', verdictColor: '#5a3a9a', verdictBg: '#f3effe', explanation: 'NLRA protects some employee speech about work conditions. Run this by HR before taking action — the approach depends heavily on what was posted and whether it could be protected activity.' },
+    ],
+    mistakes: [
+      { title: 'Promising confidentiality to an employee who reports a concern', desc: 'You cannot promise confidentiality — you are obligated to report certain things. Tell employees: "I\'ll handle this as discreetly as possible, but I may be required to report what you share."' },
+      { title: 'Investigating the complaint yourself', desc: 'Do not interview witnesses, review camera footage, or confront the accused without HR direction. Self-conducted manager investigations contaminate the formal process and create legal exposure.' },
+      { title: 'Retaliating (even unintentionally) against the reporting employee', desc: 'Avoid schedule changes, workload shifts, or reduced opportunities for anyone who files a complaint. Even well-intentioned "protection" moves can look like retaliation. Check with HR first.' },
+      { title: 'Sharing investigation details with the team', desc: '"Everyone already knows anyway" is not a reason to talk about it. Any disclosure of investigation details — even informal — can compromise the process and violate employee privacy.' },
+    ]
+  }
+
+};
+
+function showPolicy(key) {
+  const p = policies[key];
+  document.querySelectorAll('.policy-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+
+  const checkIcon = (type) => {
+    if (type === 'yes') return `<div class="check-icon" style="background:#eaf5ef;color:#1a7a4a">✓</div>`;
+    if (type === 'no') return `<div class="check-icon" style="background:#fdf0f0;color:#b83232">✗</div>`;
+    return `<div class="check-icon" style="background:#e8f0fb;color:#00377b">→</div>`;
+  };
+
+  const html = `
+    <div class="framework-header">
+      <div>
+        <div class="framework-eyebrow">${p.category} · Decision Framework</div>
+        <h1 class="framework-title">${p.label}</h1>
+        <p class="framework-desc">${p.description}</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-direction:column">
+        <div class="framework-badge">
+          <div><div class="framework-badge-label">Audience</div><div class="framework-badge-value">${p.audience}</div></div>
+        </div>
+        <div class="framework-badge">
+          <div><div class="framework-badge-label">Review Cycle</div><div class="framework-badge-value">${p.reviewCycle}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-grid">
+      <!-- DEFINITION -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:${p.definition.iconBg};font-size:14px">${p.definition.icon}</div>
+          <span class="card-title">${p.definition.title}</span>
+        </div>
+        <div class="card-body">
+          <ul class="check-list">
+            ${p.definition.items.map(item => `
+              <li class="check-item">
+                ${checkIcon(item.type)}
+                <span>${item.text}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      </div>
+
+      <!-- EXCUSED VS UNEXCUSED -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:#f1f5f9;font-size:14px">⚖️</div>
+          <span class="card-title">Excused vs. Unexcused</span>
+        </div>
+        <div class="two-col">
+          <div class="two-col-side">
+            <div class="two-col-label" style="color:#1a7a4a">Excused / Acceptable</div>
+            <ul class="check-list">
+              ${p.excused.excused.map(item => `
+                <li class="check-item">
+                  <div class="check-icon" style="background:#eaf5ef;color:#1a7a4a">✓</div>
+                  <span style="font-size:13px">${item}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+          <div class="two-col-side">
+            <div class="two-col-label" style="color:#b83232">Unexcused / Actionable</div>
+            <ul class="check-list">
+              ${p.excused.unexcused.map(item => `
+                <li class="check-item">
+                  <div class="check-icon" style="background:#fdf0f0;color:#b83232">✗</div>
+                  <span style="font-size:13px">${item}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESCALATION -->
+    <div class="section-full">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:#e8f0fb;font-size:14px">📈</div>
+          <span class="card-title">Escalation Path — When to Take Action</span>
+        </div>
+        <div class="card-body">
+          <div class="escalation-steps">
+            ${p.escalation.map(step => `
+              <div class="escalation-step">
+                <div class="step-num">${step.num}</div>
+                <div class="step-content">
+                  <div class="step-title">${step.title}</div>
+                  <div class="step-desc">${step.desc}</div>
+                  <span class="step-trigger" style="color:${step.triggerColor};background:${step.triggerBg}">Trigger: ${step.trigger}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-grid">
+      <!-- HR REQUIRED -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:#e8f0fb;font-size:14px">🔔</div>
+          <span class="card-title">When HR Must Be Involved</span>
+        </div>
+        <div class="card-body">
+          <div class="hr-items">
+            ${p.hrRequired.map(item => `
+              <div class="hr-item">
+                <div class="hr-dot"></div>
+                <span>${item}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- EXAMPLES -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:#f3effe;font-size:14px">💡</div>
+          <span class="card-title">Real Scenarios & What to Do</span>
+        </div>
+        <div class="card-body">
+          <div class="examples-list">
+            ${p.examples.map(ex => `
+              <div class="example-item">
+                <div class="example-scenario" style="background:${ex.verdictBg};border-color:${ex.verdictBg}">
+                  ${ex.scenario}
+                  <span class="example-verdict" style="color:${ex.verdictColor};background:${ex.verdictBg};border:1px solid ${ex.verdictColor}22">→ ${ex.verdict}</span>
+                  <div style="clear:both"></div>
+                </div>
+                <div class="example-body">${ex.explanation}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMON MISTAKES -->
+    <div class="section-full">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:#fdf0f0;font-size:14px">⛔</div>
+          <span class="card-title">Common Mistakes Managers Make</span>
+        </div>
+        <div class="card-body">
+          <div class="mistake-list">
+            ${p.mistakes.map(m => `
+              <div class="mistake-item">
+                <div class="mistake-x">✗</div>
+                <div class="mistake-content">
+                  <div class="mistake-title">${m.title}</div>
+                  <div class="mistake-desc">${m.desc}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:1.5rem 0 0.5rem;text-align:center;font-size:12px;color:#8a8fa0;">
+      This framework is for guidance purposes only. Always consult HR for final decisions. · Human Resources · ${new Date().toLocaleDateString('en-US', {year:'numeric',month:'long'})}
+    </div>
+  `;
+
+  document.getElementById('main-content').innerHTML = html;
+}
+
+function showPolicyByKey(key) {
+  const valid = Object.keys(policies);
+  const target = valid.includes(key) ? key : 'attendance';
+  document.querySelectorAll('.policy-item').forEach(el => el.classList.remove('active'));
+  const match = document.querySelector(`.policy-item[data-key="${target}"]`);
+  if (match) match.classList.add('active');
+  const p = policies[target];
+
+  const checkIcon = (type) => {
+    if (type === 'yes') return `<div class="check-icon" style="background:#eaf5ef;color:#1a7a4a">✓</div>`;
+    if (type === 'no') return `<div class="check-icon" style="background:#fdf0f0;color:#b83232">✗</div>`;
+    return `<div class="check-icon" style="background:#e8f0fb;color:#00377b">→</div>`;
+  };
+
+  const isRedBanner = p.trainingNote && p.trainingNote.includes('⚡');
+  const trainingBanner = p.trainingNote ? `
+    <div style="background:${isRedBanner ? '#fdf0f0' : '#fef7e8'};border:1px solid ${isRedBanner ? '#f5c0c0' : '#f0d090'};border-radius:8px;padding:11px 18px;font-size:13px;color:${isRedBanner ? '#7a3030' : '#6b3e00'};line-height:1.6;margin-bottom:1.5rem;">
+      ${p.trainingNote}
+    </div>` : '';
+
+  const saturdayBlock = p.definition.saturdayProtocol ? `
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#8a5500;margin-bottom:8px;">${p.definition.saturdayProtocol.label}</div>
+      <ul class="check-list">
+        ${p.definition.saturdayProtocol.items.map(item => `
+          <li class="check-item">
+            <div class="check-icon" style="background:${item.bg};color:${item.color};font-weight:700;font-size:11px;">${item.num}</div>
+            <span>${item.text}</span>
+          </li>`).join('')}
+      </ul>
+    </div>` : '';
+
+  const pointsSection = p.pointsTable ? `
+    <div class="section-full">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:#e8f0fb;font-size:14px">🔢</div>
+          <span class="card-title">${p.pointsTable.title}</span>
+        </div>
+        <div class="card-body">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px;">
+            <thead>
+              <tr>
+                <th style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#5a6070;padding:6px 10px;border-bottom:1px solid var(--border);text-align:left;">Occurrence</th>
+                <th style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#5a6070;padding:6px 10px;border-bottom:1px solid var(--border);text-align:left;">Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${p.pointsTable.rows.map(row => `
+                <tr>
+                  <td style="padding:9px 10px;border-bottom:1px solid var(--border);font-size:13px;">${row.label}</td>
+                  <td style="padding:9px 10px;border-bottom:1px solid var(--border);">
+                    <span style="display:inline-block;font-size:12px;font-weight:700;padding:2px 10px;border-radius:12px;background:${row.severity === 'high' ? '#fdf0f0' : '#fef7e8'};color:${row.severity === 'high' ? '#b83232' : '#8a5500'};">${row.points}</span>
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+          <div style="background:#fdf0f0;border:1px solid #f5c0c0;border-radius:8px;padding:12px 16px;font-size:13px;line-height:1.7;color:#1a1a2e;">
+            <span style="font-weight:700;color:#b83232;">⛔ Excessiveness &amp; Disciplinary Action</span><br>
+            ${p.pointsTable.thresholds.map(t => `• ${t}`).join('<br>')}
+          </div>
+        </div>
+      </div>
+    </div>` : '';
+
+  const html = `
+    <div class="framework-header">
+      <div>
+        <div class="framework-eyebrow">${p.category} · Decision Framework</div>
+        <h1 class="framework-title">${p.label}</h1>
+        <p class="framework-desc">${p.description}</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-direction:column">
+        <div class="framework-badge">
+          <div><div class="framework-badge-label">Audience</div><div class="framework-badge-value">${p.audience}</div></div>
+        </div>
+        <div class="framework-badge">
+          <div><div class="framework-badge-label">Review Cycle</div><div class="framework-badge-value">${p.reviewCycle}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${trainingBanner}
+
+    <div class="section-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:${p.definition.iconBg};font-size:14px">${p.definition.icon}</div>
+          <span class="card-title">${p.definition.title}</span>
+        </div>
+        <div class="card-body">
+          <ul class="check-list">
+            ${p.definition.items.map(item => {
+              const isProtectedClass = item.text.includes('protected class, such as:');
+              if (isProtectedClass) {
+                const parts = item.text.split(': ');
+                const label = parts[0] + ':';
+                const classes = parts[1].split(', ');
+                return `<li class="check-item">${checkIcon(item.type)}<span>${label}<br>${classes.map(c => `<span style="display:inline-block;margin-left:4px;font-size:12px;color:var(--text-muted);">• ${c}</span>`).join('<br>')}</span></li>`;
+              }
+              return `<li class="check-item">${checkIcon(item.type)}<span>${item.text}</span></li>`;
+            }).join('')}
+          </ul>
+          ${saturdayBlock}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:#f1f5f9;font-size:14px">⚖️</div>
+          <span class="card-title">Excused vs. Unexcused</span>
+        </div>
+        <div class="two-col">
+          <div class="two-col-side">
+            <div class="two-col-label" style="color:#1a7a4a">Excused / Acceptable</div>
+            <ul class="check-list">
+              ${p.excused.excused.map(item => `<li class="check-item"><div class="check-icon" style="background:#eaf5ef;color:#1a7a4a">✓</div><span style="font-size:13px">${item}</span></li>`).join('')}
+            </ul>
+          </div>
+          <div class="two-col-side">
+            <div class="two-col-label" style="color:#b83232">Unexcused / Actionable</div>
+            <ul class="check-list">
+              ${p.excused.unexcused.map(item => `<li class="check-item"><div class="check-icon" style="background:#fdf0f0;color:#b83232">✗</div><span style="font-size:13px">${item}</span></li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${pointsSection}
+
+    <div class="section-full">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:#e8f0fb;font-size:14px">📈</div>
+          <span class="card-title">Escalation Path — When to Take Action</span>
+        </div>
+        <div class="card-body">
+          ${p.escalationNote ? `<div style="background:#fef7e8;border:1px solid #f0d090;border-radius:7px;padding:10px 14px;font-size:12px;color:#6b3e00;line-height:1.5;margin-bottom:12px;">${p.escalationNote}</div>` : ''}
+          <div class="escalation-steps">
+            ${p.escalation.map(step => `
+              <div class="escalation-step">
+                <div class="step-num">${step.num}</div>
+                <div class="step-content">
+                  <div class="step-title">${step.title}</div>
+                  <div class="step-desc">${step.desc}</div>
+                  <span class="step-trigger" style="color:${step.triggerColor};background:${step.triggerBg}">Trigger: ${step.trigger}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:#e8f0fb;font-size:14px">🔔</div>
+          <span class="card-title">When HR Must Be Involved</span>
+        </div>
+        <div class="card-body">
+          <div class="hr-items">
+            ${p.hrRequired.map(item => `<div class="hr-item"><div class="hr-dot"></div><span>${item}</span></div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:#f3effe;font-size:14px">💡</div>
+          <span class="card-title">Real Scenarios & What to Do</span>
+        </div>
+        <div class="card-body">
+          ${p.examplesNote ? `<div style="background:#eaf5ef;border:1px solid #a8d8ba;border-radius:7px;padding:9px 13px;font-size:12px;color:#0f4a2a;line-height:1.5;font-weight:600;margin-bottom:10px;">${p.examplesNote}</div>` : ''}
+          <div class="examples-list">
+            ${p.examples.map(ex => `
+              <div class="example-item">
+                <div class="example-scenario" style="background:${ex.verdictBg};border-color:${ex.verdictBg}">
+                  ${ex.scenario}
+                  <span class="example-verdict" style="color:${ex.verdictColor};background:${ex.verdictBg};border:1px solid ${ex.verdictColor}22">→ ${ex.verdict}</span>
+                  <div style="clear:both"></div>
+                </div>
+                <div class="example-body">${ex.explanation}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-full">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon" style="background:#fdf0f0;font-size:14px">⛔</div>
+          <span class="card-title">Common Mistakes Managers Make</span>
+        </div>
+        <div class="card-body">
+          <div class="mistake-list">
+            ${p.mistakes.map(m => `
+              <div class="mistake-item">
+                <div class="mistake-x">✗</div>
+                <div class="mistake-content">
+                  <div class="mistake-title">${m.title}</div>
+                  <div class="mistake-desc">${m.desc.replace(/\n/g, '<br>')}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:1.5rem 0 0.5rem;text-align:center;font-size:12px;color:#8a8fa0;">
+      This framework is for guidance purposes only. Always consult HR for final decisions. · Human Resources · ${new Date().toLocaleDateString('en-US', {year:'numeric',month:'long'})}
+    </div>
+  `;
+
+  document.getElementById('main-content').innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+function showPolicy(key, updateHash = true) {
+  if (updateHash) history.replaceState(null, '', '#' + key);
+  showPolicyByKey(key);
+}
+
+document.querySelectorAll('.policy-item[data-key]').forEach(el => {
+  el.addEventListener('click', () => showPolicy(el.dataset.key));
+});
+
+const hash = location.hash.replace('#', '');
+showPolicyByKey(hash || 'attendance');
+</script>
+</body>
+</html>
